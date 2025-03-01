@@ -1,0 +1,189 @@
+# Email Reply Generator - Project Documentation
+
+## Overview
+
+The Email Reply Generator is a web-based application designed to automatically generate contextually appropriate replies to incoming emails. The system analyzes the content of an email, identifies its intent, and generates a polite, professional, and relevant reply based on predefined rules and templates. The goal is to save time for users by providing quick and accurate responses to common email scenarios without using any machine learning or AI capabilities.
+
+## Key Features
+
+- **Email Analysis**: Analyzes email content using keyword matching to determine the type of email
+- **Template-Based Replies**: Generates responses using predefined templates for different email types
+- **Context Extraction**: Extracts sender names and topics from email content
+- **Template Selection**: Allows users to manually select templates for specific response types
+- **Copy to Clipboard**: One-click copying of generated replies
+
+## Technology Stack
+
+- **Frontend Framework**: React with TypeScript
+- **Styling**: Tailwind CSS for responsive design
+- **Icons**: Lucide React for UI icons
+- **Build Tool**: Vite for fast development and optimized production builds
+
+## Application Structure
+
+### Core Components
+
+1. **App Component** (`src/App.tsx`)
+   - Main application interface
+   - Manages state for email input, generated replies, and template selection
+   - Handles user interactions (generate, copy, clear)
+
+2. **Email Processor** (`src/utils/emailProcessor.ts`)
+   - Contains logic for analyzing emails and generating replies
+   - Implements keyword matching for email type detection
+   - Extracts contextual information from emails
+   - Fills templates with appropriate content
+
+3. **Templates** (`src/data/templates.ts`)
+   - Defines response templates for different email types
+   - Includes descriptions and keywords for each template type
+   - Provides placeholder patterns for customization
+
+4. **Types** (`src/types.ts`)
+   - TypeScript type definitions for email types and templates
+   - Ensures type safety throughout the application
+
+### Email Types Supported
+
+The application supports the following email types:
+
+1. **Inquiry**: Responses to general inquiries about products, services, or information
+2. **Meeting Request**: Responses to requests for meetings or appointments
+3. **Follow Up**: Responses to follow-up emails regarding previous conversations
+4. **Thank You**: Responses to thank you emails
+5. **Complaint**: Responses to complaints or expressions of dissatisfaction
+6. **Support Request**: Responses to technical support or assistance requests
+7. **Introduction**: Responses to introductory emails or new connections
+8. **Feedback**: Responses to feedback or suggestions
+9. **Unknown**: Generic responses when the email type cannot be determined
+
+## How It Works
+
+### Email Analysis Process
+
+1. The user pastes an email into the input area
+2. When "Generate Reply" is clicked, the system:
+   - Analyzes the email content using keyword matching
+   - Identifies the most likely email type based on keywords present
+   - Falls back to additional heuristics if no clear match is found
+   - Defaults to "Unknown" type if no pattern is recognized
+
+### Reply Generation Process
+
+1. The system selects the appropriate template based on the identified email type
+2. It extracts contextual information from the email:
+   - Sender's name (from signature patterns or "From:" lines)
+   - Main topic (from subject lines or first sentence)
+3. It generates custom content based on the email type
+4. It replaces placeholders in the template with extracted and generated content
+5. The complete reply is displayed to the user
+
+### Manual Template Selection
+
+Users can also manually select a template by clicking on one of the available templates in the "Available Templates" section. This overrides the automatic email type detection and generates a reply using the selected template.
+
+## Code Walkthrough
+
+### Email Analysis Logic
+
+The `analyzeEmail` function in `emailProcessor.ts` determines the email type by:
+
+1. Converting the email content to lowercase for case-insensitive matching
+2. Checking if any keywords from each template appear in the email
+3. Applying additional heuristics for common email patterns
+4. Returning the matched email type or "Unknown" if no match is found
+
+```typescript
+export function analyzeEmail(emailContent: string): EmailType {
+  const content = emailContent.toLowerCase();
+  
+  // Check each template's keywords against the email content
+  for (const [type, template] of Object.entries(templates)) {
+    if (type === 'Unknown') continue; // Skip the unknown type for now
+    
+    // Check if any keywords from this template appear in the email
+    const matchesKeyword = template.keywords.some(keyword => 
+      content.includes(keyword.toLowerCase())
+    );
+    
+    if (matchesKeyword) {
+      return type as EmailType;
+    }
+  }
+  
+  // Additional heuristics for common email types
+  // ...
+  
+  // If no specific type is determined, return Unknown
+  return 'Unknown';
+}
+```
+
+### Reply Generation Logic
+
+The `generateReply` function creates a response by:
+
+1. Getting the template for the identified email type
+2. Extracting information from the email (sender, topic)
+3. Generating custom content based on the email type
+4. Replacing placeholders in the template with the appropriate content
+
+```typescript
+export function generateReply(emailContent: string, emailType: EmailType): string {
+  // Get the template for the email type
+  const template = templates[emailType] || templates['Unknown'];
+  
+  // Extract information from the email
+  const sender = extractSenderName(emailContent);
+  const topic = extractTopic(emailContent);
+  
+  // Generate custom response based on email type
+  const customResponse = generateCustomResponse(emailContent, emailType);
+  
+  // Replace placeholders in the template
+  let reply = template.template
+    .replace('{sender}', sender)
+    .replace('{topic}', topic)
+    .replace('{yourName}', 'Your Name');
+  
+  // Replace specific placeholders based on email type
+  // ...
+  
+  return reply;
+}
+```
+
+## User Interface
+
+The user interface is divided into three main sections:
+
+1. **Input Email Section**
+   - Textarea for pasting the received email
+   - Clear button to reset the input
+   - Generate Reply button to process the email
+
+2. **Generated Reply Section**
+   - Displays the generated reply
+   - Shows the detected email type
+   - Provides a Copy to Clipboard button
+
+3. **Available Templates Section**
+   - Displays all available template types
+   - Allows users to select a specific template
+   - Shows a description for each template
+
+## Future Enhancements
+
+Potential improvements for the Email Reply Generator:
+
+1. **Improved Analysis**: Enhance the keyword matching with more sophisticated pattern recognition
+2. **Custom Templates**: Allow users to create and save their own templates
+3. **Email Integration**: Direct integration with email clients
+4. **Multiple Languages**: Support for generating replies in different languages
+5. **User Profiles**: Save user information for personalized signatures
+6. **Template Editor**: Visual editor for customizing templates
+7. **Email History**: Save and manage previously generated replies
+
+## Conclusion
+
+The Email Reply Generator provides a practical solution for quickly generating appropriate email responses without relying on AI or machine learning. By using predefined templates and rule-based pattern matching, it offers a deterministic approach to email response generation that is fast, reliable, and runs entirely in the browser.
